@@ -1,0 +1,192 @@
+---
+title: "nkelley_OriginalHomeworkCode_03"
+author: "maekell98"
+date: "10/4/2021"
+output: html_document
+---
+```{r install packages/data}
+
+install.packages("tidyverse")
+
+install.packages("ggplot2")
+
+library(curl)
+
+library(ggplot2)
+
+library(tidyverse)
+
+install.packages("reshape2")
+library("reshape2")
+```
+
+1. Calculate the population mean and standard deviation for each quantitative random variable (height, weight, age, number of zombies killed, and years of education). NOTE: You will not want to use the built in var() and sd() commands as these are for samples.
+
+```{r question 1}
+f <- curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN588_Fall21/zombies.csv")
+
+d <- read.csv(f, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+#creates data frame from raw csv file
+
+s <- select(d, "height", "weight", "age", "zombies_killed", "years_of_education")
+
+#select function creates new data frame with only the columns selected from data frame d 
+
+cbind(mean = apply(s, 2, mean), sd = apply(s, 2, sd))
+
+#combines data frames with shared column headers. x and y (in this case mean and sd) specify the new column headers. The new row headers are the old column headers. I inserted the apply functions as the data to populate the x/y columns with apply(s, 2, mean) extracting the means of the columns (1=rows, 2=columns) from df s. The same for apply(s, 2, sd) except this extracted the sd. 
+```
+**Result:**
+                        mean        sd
+height              67.63010  4.310126
+weight             143.90748 18.401060
+age                 20.04696  2.965066
+zombies_killed       2.99200  1.748426
+years_of_education   2.99600  1.676543
+
+
+2. Use {ggplot} to make boxplots of each of these variables by gender.
+
+```{r boxplots by gender}
+
+f <- curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN588_Fall21/zombies.csv")
+
+d <- read.csv(f, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+#creates data frame from raw csv file
+
+GenderPlotHeight = ggplot(d, aes(x = gender, y = height)) + geom_boxplot() 
+GenderPlotHeight
+#ggplot with data pulled from data frame d, with x representing gender and y representing height organized into a geom_boxplot() 
+
+GenderPlotWeight <- ggplot(d, aes(x = gender, y = weight)) + geom_boxplot() 
+GenderPlotWeight
+
+GenderPlotAge <- ggplot(d, aes(x = gender, y = age)) + geom_boxplot() 
+GenderPlotAge
+
+GenderPlotZombiesKilled <- ggplot(d, aes(x = gender, y = zombies_killed)) + geom_boxplot() 
+GenderPlotZombiesKilled
+
+GenderPlotYearsEducation <- ggplot(d, aes(x = gender, y = years_of_education)) + geom_boxplot() 
+GenderPlotYearsEducation
+
+```
+
+3. Use {ggplot} to make scatterplots of height and weight in relation to age. Do these variables seem to be related? In what way?
+
+```{r scatterplots}
+f <- curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN588_Fall21/zombies.csv")
+
+d <- read.csv(f, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+#creates data frame from raw csv file
+
+AgeVsHeight <- ggplot(d, aes(x = age, y = height)) + geom_point() 
+AgeVsHeight
+
+#geom_point() is used to generate a scatter plot. With ggplot, you specify where the data is drawn from by using the ggplot function and then + ....() to specify how that data should be plotted. 
+
+AgeVsWeight <- ggplot(d, aes(x = age, y = weight)) + geom_point() 
+AgeVsWeight
+```
+There appears to be a positive correlation between age and height as well as between age and weight. 
+
+
+4. Using histograms and Q-Q plots, check whether the quantitative variables seem to be drawn from a normal distribution. Which seem to be and which do not (hint: not all are drawn from the normal distribution)? For those that are not normal, can you determine from which common distribution they are drawn?
+
+```{r histograms and Q-Q plots}
+
+f <- curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN588_Fall21/zombies.csv")
+
+d <- read.csv(f, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+#creates data frame from raw csv file
+
+s <- select(d, "height", "weight", "age", "zombies_killed", "years_of_education")
+
+#c <- ggplot(mpg, aes(hwy)); c2 <- ggplot(mpg) 
+#use c for histogram, c2 for qq plot
+#c + geom_histogram(binwidth = 5) x, y, alpha, color, fill, linetype, size, weigh
+#c2 + geom_qq(aes(sample = hwy)) x, y, alpha, color, fill, linetype, size, weight
+
+ggplot(s, aes(x = age)) + geom_histogram()
+
+ggplot(s, aes(sample = age)) + geom_qq()
+
+#age
+
+ggplot(s, aes(x = height)) + geom_histogram()
+
+ggplot(s, aes(sample = height)) + geom_qq()
+
+#height
+
+ggplot(s, aes(x = weight)) + geom_histogram()
+
+ggplot(s, aes(sample = weight)) + geom_qq()
+
+#weight
+
+ggplot(s, aes(x = zombies_killed)) + geom_histogram()
+
+ggplot(s, aes(sample = zombies_killed)) + geom_qq()
+
+#number of zombies killed
+
+ggplot(s, aes(x = years_of_education)) + geom_histogram()
+
+ggplot(s, aes(sample=years_of_education)) + geom_qq()
+
+#years of education
+```
+
+Age, height, and weight appear to be normally distributed. However, number of zombies killed and years of education appear to be skewed due to their curved qqplots and histograms which both appear to be somewhat skewed right. 
+
+
+5. Now use the sample() function to sample ONE subset of 30 zombie survivors (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable, and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you may need to base your estimate of the CIs on slightly different code than for the normal…
+
+```{r sample subset with mean and sd}
+
+f <- curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN588_Fall21/zombies.csv")
+
+d <- read.csv(f, header = TRUE, sep = ",", stringsAsFactors = FALSE)
+#creates data frame from raw csv file
+
+set.seed(30)
+sample <- d[sample(nrow(d), 30, replace = FALSE), ]
+
+s <- select(sample, "height", "weight", "age", "zombies_killed", "years_of_education")
+
+
+
+n <- select(sample, "height", "weight", "age")
+
+nstat <- cbind(mean = apply(n, 2, mean), sd = apply(n, 2, sd), se = (apply(n, 2, sd))/sqrt(length(n)), lower = (apply(n, 2, mean)) - qnorm(1 - 0.05/2) * (apply(n, 2, sd))/sqrt(length(n)), upper = (apply(n, 2, mean)) + qnorm(1 - 0.05/2) * (apply(n, 2, sd))/sqrt(length(n)))
+nstat
+
+library(boot)
+
+a <- select(sample, "zombies_killed", "years_of_education")
+
+abnstat <- cbind(mean = apply(a, 2, mean), sd = apply(a, 2, sd), se = (apply(a, 2, sd))/sqrt(length(a)), ci = boot.ci(boot.out = c(a$zombies_killed, a$years_of_education), type = "perc"))
+abnstat
+
+boot(data = a, R = 1000)
+boot.ci(a)
+#pretty sure I need to use bootstrapping for the non normally distributed data, but I'm having trouble figuring out how. 
+
+```
+**Normally Distributed Data Stats:**
+            mean        sd        se     lower     upper
+height  67.00077  5.205216  3.005233  61.11062  72.89092
+weight 144.53039 19.810645 11.437681 122.11295 166.94783
+age     19.37349  3.325175  1.919791  15.61077  23.13621
+
+**Non-normally Distributed Data Stats:**
+Need to calculate still... bootstrapping?
+
+6. Now draw 99 more random samples of 30 zombie apocalypse survivors, and calculate the mean for each variable for each of these samples. Together with the first sample you drew, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of this distribution of means for each variable? How do the standard deviations of means compare to the standard errors estimated in [5]? What do these sampling distributions look like (a graph might help here)? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
+
+```{r more random samples}
+
+
+
+```
