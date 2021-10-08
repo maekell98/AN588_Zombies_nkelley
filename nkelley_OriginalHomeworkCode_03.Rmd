@@ -156,22 +156,50 @@ sample <- d[sample(nrow(d), 30, replace = FALSE), ]
 s <- select(sample, "height", "weight", "age", "zombies_killed", "years_of_education")
 
 
+#**Normally Distributed CI's:**
 
 n <- select(sample, "height", "weight", "age")
 
-nstat <- cbind(mean = apply(n, 2, mean), sd = apply(n, 2, sd), se = (apply(n, 2, sd))/sqrt(length(n)), lower = (apply(n, 2, mean)) - qnorm(1 - 0.05/2) * (apply(n, 2, sd))/sqrt(length(n)), upper = (apply(n, 2, mean)) + qnorm(1 - 0.05/2) * (apply(n, 2, sd))/sqrt(length(n)))
+nstat <- cbind(mean = apply(n, 2, mean), 
+               sd = apply(n, 2, sd), 
+               se = (apply(n, 2, sd))/sqrt(length(n)), 
+               lower = (apply(n, 2, mean)) - qnorm(1 - 0.05/2) * (apply(n, 2, sd))/sqrt(length(n)), 
+               upper = (apply(n, 2, mean)) + qnorm(1 - 0.05/2) * (apply(n, 2, sd))/sqrt(length(n)))
 nstat
 
 library(boot)
 
+#**Abnormally Distributed CI's:**
+
 a <- select(sample, "zombies_killed", "years_of_education")
 
-abnstat <- cbind(mean = apply(a, 2, mean), sd = apply(a, 2, sd), se = (apply(a, 2, sd))/sqrt(length(a)), ci = boot.ci(boot.out = c(a$zombies_killed, a$years_of_education), type = "perc"))
-abnstat
+#for zombies killed:
+B = 1000
+n = nrow(a)
+boot.samples = matrix(sample(a$zombies_killed, size = B * n, replace = TRUE),
+B, n)
+zk.mean = with(a, mean(zombies_killed))
+zk.mean
+zk.sd = with(a, sd(zombies_killed))
+zk.sd
+boot.statistics = apply(boot.samples, 1, mean)
+zk.se = sd(boot.statistics)
+zk.se
+me = ceiling(10 * 2 * zk.se)/10
+round(zk.mean, 1) + c(-1, 1) * me
 
-boot(data = a, R = 1000)
-boot.ci(a)
-#pretty sure I need to use bootstrapping for the non normally distributed data, but I'm having trouble figuring out how. 
+#for years of education:
+boot.samples = matrix(sample(a$years_of_education, size = B * n, replace = TRUE),
+B, n)
+zk.mean = with(a, mean(years_of_education))
+zk.mean
+zk.sd = with(a, sd(years_of_education))
+zk.sd
+boot.statistics = apply(boot.samples, 1, mean)
+zk.se = sd(boot.statistics)
+zk.se
+me = ceiling(10 * 2 * zk.se)/10
+round(zk.mean, 1) + c(-1, 1) * me
 
 ```
 **Normally Distributed Data Stats:**
@@ -181,12 +209,126 @@ weight 144.53039 19.810645 11.437681 122.11295 166.94783
 age     19.37349  3.325175  1.919791  15.61077  23.13621
 
 **Non-normally Distributed Data Stats:**
-Need to calculate still... bootstrapping?
+zombies killed:
+mean: 3.233333
+sd: 2.028815
+se: 0.359589
+CI: (2.4, 4.0)
+
+years of education:
+mean: 2.833333
+sd: 0.9855275
+se: 0.1752246
+CI: (2.4, 3.2)
+
 
 6. Now draw 99 more random samples of 30 zombie apocalypse survivors, and calculate the mean for each variable for each of these samples. Together with the first sample you drew, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of this distribution of means for each variable? How do the standard deviations of means compare to the standard errors estimated in [5]? What do these sampling distributions look like (a graph might help here)? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
 
 ```{r more random samples}
+f <- curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN588_Fall21/zombies.csv")
+
+d <- read.csv(f, header = TRUE, sep = ",", stringsAsFactors = FALSE)
 
 
+set.seed(30)
+
+#height:
+
+height <- NULL
+
+for(i in 1:99) {
+  
+  height[i] <- mean(sample(d$height, size=30, replace=FALSE, prob = NULL))
+  
+}
+
+sheight <- height[] 
+sheight
+
+hist(sheight)
+
+mean(sheight)
+sd(sheight)
+
+#weight:
+
+weight <- NULL
+
+for(i in 1:99) {
+  
+  weight[i] <- mean(sample(d$weight, size=30, replace=FALSE, prob = NULL))
+  
+}
+
+sweight <- weight[] 
+sweight
+
+hist(sweight)
+
+mean(sweight)
+sd(sweight)
+
+#age:
+
+age <- NULL
+
+for(i in 1:99) {
+  
+  age[i] <- mean(sample(d$age, size=30, replace=FALSE, prob = NULL))
+  
+}
+
+sage <- age[] 
+sage
+
+hist(sage)
+
+mean(sage)
+sd(sage)
+
+#zombies killed
+
+zk <- NULL
+
+for(i in 1:99) {
+  
+  zk[i] <- mean(sample(d$zombies_killed, size=30, replace=FALSE, prob = NULL))
+  
+}
+
+szk <- zk[] 
+szk
+
+hist(szk)
+
+mean(szk)
+sd(szk)
+
+#years of education
+
+ye <- NULL
+
+for(i in 1:99) {
+  
+  ye[i] <- mean(sample(d$years_of_education, size=30, replace=FALSE, prob = NULL))
+  
+}
+
+sye <- ye[] 
+sye
+
+hist(sye)
+
+mean(sye)
+sd(sye)
 
 ```
+The histograms look more normal, especially for the distributions that originally looked skewed.
+
+
+Challenges:
+1. I had trouble formatting functions to actually pull the data I wanted.
+
+2. I could figure out how to get data one calculation at a time, but doing this more efficiently and getting data into nice data frames from scratch was tricky/not successful. 
+
+3. I had a lot of trouble figuring out how to use bootstrapping functions.  
