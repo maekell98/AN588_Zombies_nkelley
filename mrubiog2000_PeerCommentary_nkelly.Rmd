@@ -192,6 +192,13 @@ nstat <- cbind(mean = apply(n, 2, mean),
                upper = (apply(n, 2, mean)) + qnorm(1 - 0.05/2) * (apply(n, 2, sd))/sqrt(length(n)))
 nstat
 
+```
+
+```{r}
+##Miguel: Again, I like how you show the resulting values. You can use the function "quantile()" to directly calculate the CI from a normal distribution, so you do not need to write the whole function.
+```
+
+```{r}
 library(boot)
 
 #**Abnormally Distributed CI's:**
@@ -227,6 +234,12 @@ me = ceiling(10 * 2 * zk.se)/10
 round(zk.mean, 1) + c(-1, 1) * me
 
 ```
+
+```{r}
+##Miguel: I could not understand how did you calculate the CI for the non-normal distributions. I think you should type what each line is used for when utilizing new or non-common functions, the difference with the case above, etc so others and your future you can easily interpret your coding and the functions within.
+```
+
+
 **Normally Distributed Data Stats:**
             mean        sd        se     lower     upper
 height  67.00077  5.205216  3.005233  61.11062  72.89092
@@ -349,6 +362,14 @@ sd(sye)
 
 ```
 The histograms look more normal, especially for the distributions that originally looked skewed.
+
+```{r}
+##Miguel: The structure of your for loops is really interesting! You managed to obtain the 99 means directly with your loop which is more efficient than the way I tried to solve the problem (and did not work). However, I did not understand why did you write the line "sheight <- height[]".
+```
+
+```{r}
+##Miguel: You did a really good job! Congrats! I learnt a lot of things from your coding too! As I told you above, I would try to detail things a bit more, but apart from that the code is awesome.
+```
 
 
 Challenges:
