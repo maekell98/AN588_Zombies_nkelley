@@ -36,17 +36,24 @@ s <- select(d, "height", "weight", "age", "zombies_killed", "years_of_education"
 
 #select function creates new data frame with only the columns selected from data frame d 
 
-cbind(mean = apply(s, 2, mean), sd = apply(s, 2, sd))
+ssq <- function(x) {sum((x-mean(x))^2)} #Function to calculate the sum of squares.
+pop_var <- function(x) {ssq(x)/length(x)} #Function to calculate the variance of the population (note it is divided by "n" instead of by "n-1")
+pop_sd <- function(x) {sqrt(pop_var(x))} #Function to calculate the standard deviation of the population.
+
+#the above population functions courtesy of Miguel. I believe he calculated sd better than I did, so I inserted his function for sd into my cbind function below.
+
+cbind(mean = apply(s, 2, mean), sd = apply(s, 2, pop_sd))
 
 #combines data frames with shared column headers. x and y (in this case mean and sd) specify the new column headers. The new row headers are the old column headers. I inserted the apply functions as the data to populate the x/y columns with apply(s, 2, mean) extracting the means of the columns (1=rows, 2=columns) from df s. The same for apply(s, 2, sd) except this extracted the sd. 
 ```
+
 **Result:**
                         mean        sd
-height              67.63010  4.310126
-weight             143.90748 18.401060
-age                 20.04696  2.965066
-zombies_killed       2.99200  1.748426
-years_of_education   2.99600  1.676543
+height              67.63010  4.307970
+weight             143.90748 18.391857
+age                 20.04696  2.963583
+zombies_killed       2.99200  1.747551
+years_of_education   2.99600  1.675704
 
 
 2. Use {ggplot} to make boxplots of each of these variables by gender.
@@ -144,6 +151,8 @@ ggplot(s, aes(sample=years_of_education)) + geom_qq()
 
 Age, height, and weight appear to be normally distributed. However, number of zombies killed and years of education appear to be skewed due to their curved qqplots and histograms which both appear to be somewhat skewed right. 
 
+Zombies killed and years of education appear to be drawn from the Poisson distribution, which makes sense since Poisson distributions are used to show the probability of an event occurring over a specific period of time. 
+
 
 5. Now use the sample() function to sample ONE subset of 30 zombie survivors (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable, and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you may need to base your estimate of the CIs on slightly different code than for the normal…
 
@@ -165,10 +174,10 @@ s <- select(sample, "height", "weight", "age", "zombies_killed", "years_of_educa
 n <- select(sample, "height", "weight", "age")
 
 nstat <- cbind(mean = apply(n, 2, mean), 
-               sd = apply(n, 2, sd), 
-               se = (apply(n, 2, sd))/sqrt(length(n)), 
-               lower = (apply(n, 2, mean)) - qnorm(1 - 0.05/2) * (apply(n, 2, sd))/sqrt(length(n)), 
-               upper = (apply(n, 2, mean)) + qnorm(1 - 0.05/2) * (apply(n, 2, sd))/sqrt(length(n)))
+               sd = apply(n, 2, pop_sd), 
+               se = (apply(n, 2, pop_sd))/sqrt(length(n)), 
+               lower = (apply(n, 2, mean)) - qnorm(1 - 0.05/2) * (apply(n, 2, pop_sd))/sqrt(length(n)), 
+               upper = (apply(n, 2, mean)) + qnorm(1 - 0.05/2) * (apply(n, 2, pop_sd))/sqrt(length(n)))
 nstat
 
 library(boot)
@@ -182,7 +191,7 @@ a <- select(sample, "zombies_killed", "years_of_education")
 zkset <- NULL  # sets up a dummy variable to hold our 10000 simulations
 n <- 30
 for (i in 1:10000) {
-    zkset[i] <- mean(sample(a$zombies_killed, n, replace = TRUE))
+    zkset[i] <- mean(sample(a$zombies_killed, n, replace = FALSE))
 }
 
 quantile(zkset, c(0.025, 0.975))
@@ -195,6 +204,8 @@ for (i in 1:10000) {
 }
 
 quantile(yeset, c(0.025, 0.975))
+
+poisson.test(d$years_of_education, conf.level = 0.95 )
 
 ```
 **Normally Distributed Data Stats:**
@@ -215,6 +226,8 @@ mean: 2.833333
 sd: 0.9855275
 se: 0.1752246
 CI: (2.4, 3.2)
+
+I used bootstrapping to calculate these intervals.
 
 
 6. Now draw 99 more random samples of 30 zombie apocalypse survivors, and calculate the mean for each variable for each of these samples. Together with the first sample you drew, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of this distribution of means for each variable? How do the standard deviations of means compare to the standard errors estimated in [5]? What do these sampling distributions look like (a graph might help here)? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
@@ -326,4 +339,4 @@ Challenges:
 
 2. I could figure out how to get data one calculation at a time, but doing this more efficiently and getting data into nice data frames from scratch was tricky/not successful. 
 
-3. I had a lot of trouble figuring out how to use bootstrapping functions.  
+3. I had a lot of trouble figuring out how to use bootstrapping functions. I feel like this stemmed from a desire to use a function with "bootstrap" in the name, which resulted in lots of difficulty with syntax and understanding what I was doing. When I just broke it down to the for loop, I had a much better idea of what bootstrapping even was. Obviously, this was in the modules, but I didn't really understand it until I was doing it for the homework.   
