@@ -40,7 +40,7 @@ ssq <- function(x) {sum((x-mean(x))^2)} #Function to calculate the sum of square
 pop_var <- function(x) {ssq(x)/length(x)} #Function to calculate the variance of the population (note it is divided by "n" instead of by "n-1")
 pop_sd <- function(x) {sqrt(pop_var(x))} #Function to calculate the standard deviation of the population.
 
-#the above population functions courtesy of Miguel. I believe he calculated sd better than I did, so I inserted his function for sd into my cbind function below.
+#the above population functions courtesy of Miguel. I believe he calculated sd better than I did (because I just used regular sd() at first), so I inserted his function for sd into my cbind function below.
 
 cbind(mean = apply(s, 2, mean), sd = apply(s, 2, pop_sd))
 
@@ -118,6 +118,7 @@ s <- select(d, "height", "weight", "age", "zombies_killed", "years_of_education"
 #c + geom_histogram(binwidth = 5) x, y, alpha, color, fill, linetype, size, weigh
 #c2 + geom_qq(aes(sample = hwy)) x, y, alpha, color, fill, linetype, size, weight
 
+
 ggplot(s, aes(x = age)) + geom_histogram()
 
 ggplot(s, aes(sample = age)) + geom_qq()
@@ -147,6 +148,9 @@ ggplot(s, aes(x = years_of_education)) + geom_histogram()
 ggplot(s, aes(sample=years_of_education)) + geom_qq()
 
 #years of education
+
+hist(rpois(1000, 3), probability = T)
+#distribution -- looks like Poisson
 ```
 
 Age, height, and weight appear to be normally distributed. However, number of zombies killed and years of education appear to be skewed due to their curved qqplots and histograms which both appear to be somewhat skewed right. 
@@ -155,6 +159,8 @@ Zombies killed and years of education appear to be drawn from the Poisson distri
 
 
 5. Now use the sample() function to sample ONE subset of 30 zombie survivors (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable, and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you may need to base your estimate of the CIs on slightly different code than for the normal…
+
+package sciplot has standard error in it
 
 ```{r sample subset with mean and sd}
 
@@ -190,8 +196,8 @@ a <- select(sample, "zombies_killed", "years_of_education")
 
 zkset <- NULL  # sets up a dummy variable to hold our 10000 simulations
 n <- 30
-for (i in 1:10000) {
-    zkset[i] <- mean(sample(a$zombies_killed, n, replace = FALSE))
+for (i in 1:1000) {
+    zkset[i] <- mean(sample(a$zombies_killed, n, replace = TRUE))
 }
 
 quantile(zkset, c(0.025, 0.975))
@@ -199,33 +205,31 @@ quantile(zkset, c(0.025, 0.975))
 #for years of education:
 yeset <- NULL  # sets up a dummy variable to hold our 10000 simulations
 n <- 30
-for (i in 1:10000) {
+for (i in 1:1000) {
     yeset[i] <- mean(sample(a$years_of_education, n, replace = TRUE))
 }
 
 quantile(yeset, c(0.025, 0.975))
 
-poisson.test(d$years_of_education, conf.level = 0.95 )
-
 ```
 **Normally Distributed Data Stats:**
             mean        sd        se     lower     upper
-height  67.00077  5.205216  3.005233  61.11062  72.89092
-weight 144.53039 19.810645 11.437681 122.11295 166.94783
-age     19.37349  3.325175  1.919791  15.61077  23.13621
+height  67.00077  5.117727  2.954721  61.20962  72.79191
+weight 144.53039 19.477669 11.245438 122.48974 166.57104
+age     19.37349  3.269286  1.887523  15.67401  23.07296
 
 **Non-normally Distributed Data Stats:**
 zombies killed:
 mean: 3.233333
 sd: 2.028815
 se: 0.359589
-CI: (2.4, 4.0)
+CI: (2.599167, 3.966667)
 
 years of education:
 mean: 2.833333
 sd: 0.9855275
 se: 0.1752246
-CI: (2.4, 3.2)
+CI: (2.466667, 3.166667)
 
 I used bootstrapping to calculate these intervals.
 
@@ -333,10 +337,12 @@ sd(sye)
 ```
 The histograms look more normal, especially for the distributions that originally looked skewed.
 
+Bootstrapping allows you to analyze non-normal data with parametric analysis. 
+
 
 Challenges:
 1. I had trouble formatting functions to actually pull the data I wanted.
 
 2. I could figure out how to get data one calculation at a time, but doing this more efficiently and getting data into nice data frames from scratch was tricky/not successful. 
 
-3. I had a lot of trouble figuring out how to use bootstrapping functions. I feel like this stemmed from a desire to use a function with "bootstrap" in the name, which resulted in lots of difficulty with syntax and understanding what I was doing. When I just broke it down to the for loop, I had a much better idea of what bootstrapping even was. Obviously, this was in the modules, but I didn't really understand it until I was doing it for the homework.   
+3. I had a lot of trouble figuring out how to use bootstrapping functions. I feel like this stemmed from a desire to use a function with "bootstrap" in the name that would just spit the answers out, which resulted in lots of difficulty with syntax and understanding what I was doing. When I just broke it down to the for loop, I had a much better idea of what bootstrapping even was. Obviously, this was in the modules, but I didn't really understand it until I was doing it for the homework.   
