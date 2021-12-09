@@ -1,34 +1,26 @@
 ---
 title: "nkelley_FinalHomeworkCode_03"
-author: "maekell98"
-date: "10/8/2021"
+author: "Natalia Kelley"
 output:
-  pdf_document: default
-  html_document: default
+  html_document:
+    toc: TRUE
+    toc_depth: 3
+    toc_float: TRUE
 ---
 
-```{r install packages/data, eval=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-
-install.packages("tidyverse")
-
-install.packages("ggplot2")
-
+```{r load packages}
 library(curl)
-
 library(ggplot2)
-
 library(tidyverse)
-
-install.packages("reshape2")
 library("reshape2")
 ```
 
-1. Calculate the population mean and standard deviation for each quantitative random variable (height, weight, age, number of zombies killed, and years of education). NOTE: You will not want to use the built in var() and sd() commands as these are for samples.
+# Part One
+
+Calculate the population mean and standard deviation for each quantitative random variable (height, weight, age, number of zombies killed, and years of education). NOTE: You will not want to use the built in var() and sd() commands as these are for samples.
 
 ```{r question 1}
-
 f <- curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN588_Fall21/zombies.csv")
-
 d <- read.csv(f, header = TRUE, sep = ",", stringsAsFactors = FALSE)
 #creates data frame from raw csv file
 
@@ -55,8 +47,9 @@ age                 20.04696  2.963583
 zombies_killed       2.99200  1.747551
 years_of_education   2.99600  1.675704
 
+# Part Two 
 
-2. Use {ggplot} to make boxplots of each of these variables by gender.
+Use {ggplot} to make boxplots of each of these variables by gender.
 
 ```{r boxplots by gender}
 
@@ -83,7 +76,9 @@ GenderPlotYearsEducation
 
 ```
 
-3. Use {ggplot} to make scatterplots of height and weight in relation to age. Do these variables seem to be related? In what way?
+# Part Three
+
+Use {ggplot} to make scatterplots of height and weight in relation to age. Do these variables seem to be related? In what way?
 
 ```{r scatterplots}
 f <- curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN588_Fall21/zombies.csv")
@@ -102,7 +97,9 @@ AgeVsWeight
 There appears to be a positive correlation between age and height as well as between age and weight. 
 
 
-4. Using histograms and Q-Q plots, check whether the quantitative variables seem to be drawn from a normal distribution. Which seem to be and which do not (hint: not all are drawn from the normal distribution)? For those that are not normal, can you determine from which common distribution they are drawn?
+# Part Four
+
+Using histograms and Q-Q plots, check whether the quantitative variables seem to be drawn from a normal distribution. Which seem to be and which do not (hint: not all are drawn from the normal distribution)? For those that are not normal, can you determine from which common distribution they are drawn?
 
 ```{r histograms and Q-Q plots}
 
@@ -158,7 +155,9 @@ Age, height, and weight appear to be normally distributed. However, number of zo
 Zombies killed and years of education appear to be drawn from the Poisson distribution, which makes sense since Poisson distributions are used to show the probability of an event occurring over a specific period of time. 
 
 
-5. Now use the sample() function to sample ONE subset of 30 zombie survivors (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable, and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you may need to base your estimate of the CIs on slightly different code than for the normal…
+# Part Five
+
+Now use the sample() function to sample ONE subset of 30 zombie survivors (without replacement) from this population and calculate the mean and sample standard deviation for each variable. Also estimate the standard error for each variable, and construct the 95% confidence interval for each mean. Note that for the variables that are not drawn from the normal distribution, you may need to base your estimate of the CIs on slightly different code than for the normal…
 
 package sciplot has standard error in it
 
@@ -234,7 +233,9 @@ CI: (2.466667, 3.166667)
 I used bootstrapping to calculate these intervals.
 
 
-6. Now draw 99 more random samples of 30 zombie apocalypse survivors, and calculate the mean for each variable for each of these samples. Together with the first sample you drew, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of this distribution of means for each variable? How do the standard deviations of means compare to the standard errors estimated in [5]? What do these sampling distributions look like (a graph might help here)? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
+# Part Six
+
+Now draw 99 more random samples of 30 zombie apocalypse survivors, and calculate the mean for each variable for each of these samples. Together with the first sample you drew, you now have a set of 100 means for each variable (each based on 30 observations), which constitutes a sampling distribution for each variable. What are the means and standard deviations of this distribution of means for each variable? How do the standard deviations of means compare to the standard errors estimated in [5]? What do these sampling distributions look like (a graph might help here)? Are they normally distributed? What about for those variables that you concluded were not originally drawn from a normal distribution?
 
 ```{r more random samples}
 f <- curl("https://raw.githubusercontent.com/fuzzyatelin/fuzzyatelin.github.io/master/AN588_Fall21/zombies.csv")
@@ -340,7 +341,8 @@ The histograms look more normal, especially for the distributions that originall
 Bootstrapping allows you to analyze non-normal data with parametric analysis. 
 
 
-Challenges:
+# Challenges
+
 1. I had trouble formatting functions to actually pull the data I wanted.
 
 2. I could figure out how to get data one calculation at a time, but doing this more efficiently and getting data into nice data frames from scratch was tricky/not successful. 
